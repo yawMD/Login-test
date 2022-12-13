@@ -1,17 +1,27 @@
 import React,{useState} from "react";
+import {getData} from "../helpers/api"
 
 
-export default function Login() {
+
+const Login:React.FC = (props)=> {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [btn, setBtn] = useState({ text: "Continue", sending: false });
+
+
 
 
     const handleSubmit = (e:React.FormEvent) => {
         e.preventDefault();
         if (email && password) {
           setBtn({ text: "Logging you in...", sending: false });
+          getData(email, password).then((response)=> console.log(response)).finally(() => {
+          setBtn({ text: "Login", sending: false });
+          setTimeout(() => {
+          }, 5000);
+        });
         }
+
     }
 
 
@@ -52,10 +62,12 @@ export default function Login() {
                                 <div className="grid md:flex items-center justify-between gap-y-4 gap-x-5 pb-3">
                                     
                                 </div>
-                                <button type="submit" data-testid="submit-button" value={btn.text}
+                                <button type="submit" role="button" value={btn.text} name="Submit"
                                     className="text-white bg-blue-700 hover:bg-blue-900 focus:ring-2 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm uppercase px-5 py-3.5 tracking-widest">
-                                   {btn.text}
-                                </button>
+                                     <p> button</p>
+                                      </button>
+                                   
+                                
                             </form>
                         </div>
                     </div>
@@ -64,3 +76,5 @@ export default function Login() {
       </div>
   );
 }
+
+export default  Login
