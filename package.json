@@ -5,7 +5,6 @@
   "dependencies": {
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
     "@types/node": "^16.18.4",
     "@types/node-fetch": "^2.6.2",
     "@types/react": "^18.0.26",
@@ -47,6 +46,7 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@types/enzyme": "^3.10.12",
     "@types/enzyme-adapter-react-16": "^1.0.6",
+    "@types/jest": "^29.2.4",
     "autoprefixer": "^10.4.13",
     "axios-mock-adapter": "^1.21.2",
     "enzyme": "^3.11.0",

@@ -1,83 +1,85 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import Enzyme from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-import http from 'node:http'
-
+import {fireEvent, render, screen} from "@testing-library/react";
 
 import "@testing-library/jest-dom";
 import React from "react";
 import Login from "./components/Login";
 
 import fetchMock from 'fetch-mock'
-import { shallow } from "enzyme";
-import { nextTick } from "node:process";
 
-Enzyme.configure({ adapter: new Adapter() });
 
 const dummyUser = {
-    id:1,
-    username:"test",
-    password:"test123"
+  id: 1,
+  email: "test@test.com",
+  password: "test123"
 }
+
 describe("Login describe statement", () => {
-    test('shows the loading text once it has been posted', async() => {
-        fetchMock.post("https://jsonplaceholder.typicode.com/posts",{ 
-            status: 200,
-            body: dummyUser
-        })
-        const wrapper = shallow(<Login />)
-        expect(wrapper.find('p').text()).toContain("button")
+  test('Enter form data and submit', async () => {
+    const submit = jest.fn()
+    render(<Login submit={submit}/>)
+    const emailInput = screen.getByTestId('email')
+    const passwordInput = screen.getByTestId('password')
+    const submitBtn = screen.getByTestId('submit')
+    fireEvent.change(emailInput, {target: {value: dummyUser.email}})
+    fireEvent.change(passwordInput, {target: {value: dummyUser.password}})
 
-    })
 
-    test('shows the loadding text and then data once it has been fetched', async() => {
-        fetchMock.get("https://jsonplaceholder.typicode.com/posts",{ 
-            status: 200,
-            body: dummyUser
-        })
-        const wrapper = shallow(<Login />)
-        expect(wrapper.find('button'))
+    expect(emailInput.value).toBe(dummyUser.email)
+    expect(passwordInput.value).toBe(dummyUser.password)
 
-    })
+    fireEvent.click(submitBtn)
 
-  test("Login form should be in the document", () => {
-    const component = render(<Login />);
-    const labelNode = component.getByText("Email");
-    expect(labelNode).toBeInTheDocument();
-  });
+    expect(submit).toBeCalled()
 
-  test("username field should have label", () => {
-    const component = render(<Login />);
-    const emailInput = component.getByLabelText("Email");
-    expect(emailInput.getAttribute("name")).toBe("email");
-  });
+  })
 
-  test("username input should accept text", () => {
-    const { getByLabelText } = render(<Login />);
-    const userInput = getByLabelText("Email");
-    // expect(userInput.value).toMatch("")
-    fireEvent.change(userInput, { target: { value: "testing" } });
-    // expect(userInput.value).toMatch("testing")
-  });
+  test('Submit called successfully and returned to the user', async () => {
+    const submit = async (email: string, password: string) => {
+      fetchMock.mock("https://jsonplaceholder.typicode.com/success", 200)
+      const submitResponse = await fetch('https://jsonplaceholder.typicode.com/success', {
+        body: JSON.stringify({email, password})
+      })
 
-  //    test("should be able to submit a form",() => {
-  //     const mockfn = jest.fn();
-  //     const {getByRole} = render(<Login />)
-  //     const buttonNode = getByRole("button")
-  //     fireEvent.submit(buttonNode);
-  //     expect(mockfn).toHaveBeenCalled()
-  //    })
+      expect(email).toBe(dummyUser.email)
+      expect(password).toBe(dummyUser.password)
+      expect(submitResponse.status).toBe(200)
+      return true
+    }
 
-  test("calls the onSubmit method", () => {
-    const mockFn = jest.fn();
-    const component = render(<Login />);
-    console.log(screen);
-    const buttonNode = component.getByText("button");
-    expect(buttonNode).toBeInTheDocument();
-    userEvent.click(screen.getByText("button"));
-    //    expect(mockFn).toHaveBeenCalled()
-  });
+    render(<Login submit={submit}/>)
+    const emailInput = screen.getByTestId('email')
+    const passwordInput = screen.getByTestId('password')
+    const submitBtn = screen.getByTestId('submit')
 
+    fireEvent.change(emailInput, {target: {value: dummyUser.email}})
+    fireEvent.change(passwordInput, {target: {value: dummyUser.password}})
+
+    fireEvent.click(submitBtn)
+  })
+
+  test('Failed form submit', async () => {
+    const submit = async (email: string, password: string) => {
+      fetchMock.mock("https://jsonplaceholder.typicode.com/failed", 400)
+      const submitResponse = await fetch('https://jsonplaceholder.typicode.com/failed', {
+        body: JSON.stringify({email, password})
+      })
+
+      expect(email).toBe(dummyUser.email)
+      expect(password).toBe(dummyUser.password)
+      expect(submitResponse.status).toBe(400)
+      return true
+    }
+
+    render(<Login submit={submit}/>)
+
+    const emailInput = screen.getByTestId('email')
+    const passwordInput = screen.getByTestId('password')
+    const submitBtn = screen.getByTestId('submit')
+
+    fireEvent.change(emailInput, {target: {value: dummyUser.email}})
+    fireEvent.change(passwordInput, {target: {value: dummyUser.password}})
+
+    fireEvent.click(submitBtn)
+  })
 
 });
